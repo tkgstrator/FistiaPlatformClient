@@ -1,8 +1,8 @@
 //
-//  File.swift
-//  
+//  Response.swift
+//  FistiaPlatformClient
 //
-//  Created by devonly on 2022/01/01.
+//  Created by devonly on 2022/01/02.
 //
 
 import Foundation

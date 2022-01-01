@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  Auth.swift
+//  FistiaPlatformClient
 //
 //  Created by devonly on 2022/01/02.
 //

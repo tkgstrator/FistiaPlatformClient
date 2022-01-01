@@ -1,8 +1,8 @@
 //
-//  File.swift
-//  
+//  User.swift
+//  FistiaPlatformClient
 //
-//  Created by devonly on 2022/01/01.
+//  Created by devonly on 2022/01/02.
 //
 
 import Foundation
@@ -26,16 +26,16 @@ public enum User {
         public var method: HTTPMethod = .patch
         public var path: String
         public var parameters: Parameters?
-        init(userId: String, email: String, name: String, password: String, authority: String, avatarData: String) {
+        init(userId: String, newUserId: String?, email: String?, name: String?, password: String?, authority: String?, avatarData: String?) {
             self.path = "users/\(userId)"
             self.parameters = [
                 "email": email,
-                "id": userId,
+                "id": newUserId,
                 "name": name,
                 "password": password,
                 "authority": authority,
                 "avatarData": avatarData
-            ]
+            ].compactMapValues({ $0 })
         }
     }
     

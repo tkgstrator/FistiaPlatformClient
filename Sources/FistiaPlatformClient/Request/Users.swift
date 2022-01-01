@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  Users.swift
+//  FistiaPlatformClient
 //
 //  Created by devonly on 2022/01/02.
 //
@@ -15,7 +15,7 @@ public enum Users {
         public var method: HTTPMethod = .get
         public var path: String = "users"
         public var parameters: Parameters?
-        init(start: Int, limit: Int, q: String, ordering: String) {
+        init(start: Int = 0, limit: Int = 25, q: String = "", ordering: String = "") {
             self.parameters = [
                 "start": start,
                 "limit": limit,
@@ -31,7 +31,7 @@ public enum Users {
         public var method: HTTPMethod = .post
         public var path: String = "users"
         public var parameters: Parameters?
-        init(userId: String, email: String, name: String, password: String, authority: String, avatarData: String) {
+        init(userId: String, email: String, name: String, password: String, authority: String?, avatarData: String?) {
             self.parameters = [
                 "email": email,
                 "id": userId,
@@ -39,7 +39,7 @@ public enum Users {
                 "password": password,
                 "authority": authority,
                 "avatarData": avatarData
-            ]
+            ].compactMapValues({ $0 })
         }
     }
 }

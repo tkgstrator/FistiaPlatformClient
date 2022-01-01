@@ -8,21 +8,16 @@
 import Foundation
 import Alamofire
 
-public protocol RequestType: URLRequestConvertible {
+public protocol RequestType {
     associatedtype ResponseType: Codable
     
     var method: HTTPMethod { get }
     var path: String { get}
-    var baseURL: URL { get }
     var parameters: Parameters? { get }
     var encoding: ParameterEncoding { get }
 }
 
 extension RequestType {
-    /// 基本URL
-    public var baseURL: URL {
-        URL(string: "https://api.fistia.jp")!
-    }
     
     /// エンコーディング
     public var encoding: ParameterEncoding {
@@ -37,9 +32,13 @@ extension RequestType {
     }
     
     /// URLRequest
-    public func asURLRequest() throws -> URLRequest {
-        let url = baseURL.appendingPathComponent(path)
-        let urlRequest = try URLRequest(url: url, method: method, headers: nil)
-        return try encoding.encode(urlRequest, with: parameters)
+    public func asURLRequest(environment: Environment) throws -> URLRequest {
+        do {
+            let url = URL(string: environment.rawValue)!.appendingPathComponent(path)
+            let urlRequest = try URLRequest(url: url, method: method, headers: nil)
+            return try encoding.encode(urlRequest, with: parameters)
+        } catch(let error) {
+            throw AFError.createURLRequestFailed(error: error)
+        }
     }
 }

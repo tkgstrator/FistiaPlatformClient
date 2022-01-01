@@ -23,6 +23,7 @@ open class Fistia: RequestInterceptor {
         return decoder
     }()
     
+    internal var task: Set<AnyCancellable> = Set<AnyCancellable>()
     internal let environment: Environment
     internal let keychain: Keychain
     internal let oauthURL: URL
@@ -35,11 +36,47 @@ open class Fistia: RequestInterceptor {
     }
     
     internal func publish<T: RequestType>(_ request: T) -> AnyPublisher<T.ResponseType, AFError> {
-        session.request(request, interceptor: self)
+        guard let request = try? request.asURLRequest(environment: environment) else {
+            return Fail(outputType: T.ResponseType.self, failure: AFError.createURLRequestFailed(error: FistiaError.credential))
+                .eraseToAnyPublisher()
+        }
+        
+        return session.request(request, interceptor: self)
             .validate()
             .validate(contentType: ["application/json"])
             .publishDecodable(type: T.ResponseType.self, decoder: decoder)
             .value()
+    }
+    
+    internal func authorize<T: RequestType>(_ request: T)  -> AnyPublisher<T.ResponseType, AFError> {
+        guard let request = try? request.asURLRequest(environment: environment) else {
+            return Fail(outputType: T.ResponseType.self, failure: AFError.createURLRequestFailed(error: FistiaError.credential))
+                .eraseToAnyPublisher()
+        }
+        
+        return session.request(request)
+            .cURLDescription { request in
+                print(request)
+            }
+            .validate()
+            .validate(contentType: ["application/json"])
+            .publishDecodable(type: T.ResponseType.self, decoder: decoder)
+            .value()
+    }
+    
+    public func authorize(userId: String, password: String, completion: @escaping (Swift.Result<Bool, AFError>) -> Void) {
+        authorize(Auth.Local(idOrEmailAddress: userId, password: password))
+            .sink(receiveCompletion: { result in
+                switch result {
+                    case .finished:
+                        completion(.success(true))
+                    case .failure(let error):
+                        completion(.failure(error))
+                }
+            }, receiveValue: { [self] response in
+                keychain.setValue(response.authToken)
+            })
+            .store(in: &task)
     }
     
     public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Swift.Result<URLRequest, Error>) -> Void) {

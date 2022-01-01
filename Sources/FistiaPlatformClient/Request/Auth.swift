@@ -15,6 +15,7 @@ public enum Auth {
         public var method: HTTPMethod = .post
         public var path: String = "auth/local"
         public var parameters: Parameters?
+        
         init(idOrEmailAddress: String, password: String) {
             self.parameters = [
                 "idOrEmailAddress": idOrEmailAddress,
